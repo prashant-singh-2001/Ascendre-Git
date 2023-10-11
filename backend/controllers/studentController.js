@@ -24,19 +24,21 @@ exports.loginStudent = catchAsyncErrors(async (req, res, next) => {
   if (!student) {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
-
+  if (student.isDeleted) {
+    return next(new ErrorHandler("Your account is deleted", 401));
+  }
   const isPasswordMatched = await student.comparePassword(password);
 
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
-  // console.log(student._id);
 
   sendToken(student, 200, res);
 });
 
 exports.getStudents = catchAsyncErrors(async (req, res, next) => {
-  const students = await Student.find();
+  const allStudents = await Student.find();
+  const students = allStudents.filter((student) => !student.isDeleted);
   res.status(200).json({
     success: true,
     data: students,
@@ -45,6 +47,9 @@ exports.getStudents = catchAsyncErrors(async (req, res, next) => {
 
 exports.getStudent = catchAsyncErrors(async (req, res, next) => {
   const student = await Student.findById(req.params.id);
+  if (student.isDeleted) {
+    return next(new ErrorHandler("Your account is deleted", 401));
+  }
   res.status(200).json({
     success: true,
     data: student,
@@ -85,11 +90,22 @@ exports.logoutStudent = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.getStudentDetails = catchAsyncErrors(async (req, res, next) => {
-  // console.log(req);
   const student = await Student.findById(req.student.id);
-
+  if (student.isDeleted) {
+    return next(new ErrorHandler("Your account is deleted", 401));
+  }
   res.status(200).json({
     success: true,
     student,
+  });
+});
+
+exports.deleteStudent = catchAsyncErrors(async (req, res, next) => {
+  const student = await Student.findById(req.student.id);
+  student.isDeleted = true;
+  await student.save();
+  res.status(200).json({
+    success: true,
+    message: "Student Deleted",
   });
 });

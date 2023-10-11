@@ -8,6 +8,7 @@ const {
   updatePassword,
   logoutStudent,
   getStudentDetails,
+  deleteStudent,
 } = require("../controllers/studentController");
 const { isAuthenticatedUser } = require("../middlewares/auth");
 const router = express.Router();
@@ -20,5 +21,6 @@ router.route("/students").get(getStudents);
 router.route("/getStudent/:id").get(getStudent);
 router.route("/password/change").put(isAuthenticatedUser, updatePassword);
 router.route("/me").get(isAuthenticatedUser, getStudentDetails);
+router.route("/delete/me").delete(isAuthenticatedUser, deleteStudent);
 
 module.exports = router;

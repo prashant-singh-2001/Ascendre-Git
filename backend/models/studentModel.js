@@ -78,6 +78,7 @@ const studentSchema = new mongoose.Schema({
       required: false,
     },
   ],
+  isDeleted: { type: Boolean, required: true, default: false },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
