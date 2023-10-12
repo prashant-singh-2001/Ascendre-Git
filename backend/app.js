@@ -16,7 +16,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 const student = require("./routes/studentRoute");
+const post = require("./routes/postRoute");
 
 app.use("/api/v1/student", student);
+app.use("/api/v1/post", post);
 
 module.exports = app;

@@ -3,6 +3,7 @@ const Student = require("../models/studentModel");
 const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../utils/errorHandler");
+const Post = require("../models/postModel");
 
 exports.createStudent = catchAsyncErrors(async (req, res, next) => {
   const student = await Student.create(req.body);
@@ -41,7 +42,7 @@ exports.getStudents = catchAsyncErrors(async (req, res, next) => {
   const students = allStudents.filter((student) => !student.isDeleted);
   res.status(200).json({
     success: true,
-    data: students,
+    students,
   });
 });
 
@@ -52,7 +53,7 @@ exports.getStudent = catchAsyncErrors(async (req, res, next) => {
   }
   res.status(200).json({
     success: true,
-    data: student,
+    student,
   });
 });
 
@@ -109,3 +110,5 @@ exports.deleteStudent = catchAsyncErrors(async (req, res, next) => {
     message: "Student Deleted",
   });
 });
+
+
