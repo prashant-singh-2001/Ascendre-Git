@@ -39,13 +39,25 @@ exports.loginStudent = catchAsyncErrors(async (req, res, next) => {
 
 exports.getStudents = catchAsyncErrors(async (req, res, next) => {
   const allStudents = await Student.find();
-  const students = allStudents.filter((student) => !student.isDeleted);
+  const students = allStudents.filter(
+    (student) => !student.isDeleted && student.role !== "admin"
+  );
   res.status(200).json({
     success: true,
     students,
   });
 });
 
+exports.getStudentsAdmin = catchAsyncErrors(async (req, res, next) => {
+  if (req.student && req.student.role !== "Admin") {
+    return next(new ErrorHandler("Unauthorized", 401));
+  }
+  const allStudents = await Student.find();
+  res.status(200).json({
+    success: true,
+    allStudents,
+  });
+});
 exports.getStudent = catchAsyncErrors(async (req, res, next) => {
   const student = await Student.findById(req.params.id);
   if (student.isDeleted) {
@@ -110,5 +122,3 @@ exports.deleteStudent = catchAsyncErrors(async (req, res, next) => {
     message: "Student Deleted",
   });
 });
-
-

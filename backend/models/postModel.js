@@ -28,9 +28,14 @@ const postSchema = new mongoose.Schema({
   },
   comments: [
     {
-      Author: {
+      Author_ID: {
         type: mongoose.Schema.ObjectId,
         ref: "Student",
+        required: true,
+      },
+      Author_Name: {
+        type: String,
+        required: true,
       },
       content: {
         type: String,
@@ -38,15 +43,51 @@ const postSchema = new mongoose.Schema({
       },
     },
   ],
+  noOfComments: {
+    type: Number,
+    default: 0,
+  },
   likes: [
     {
-      type: mongoose.Schema.ObjectId,
-      ref: "Student",
+      a_id: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Student",
+        required: true,
+      },
+      name: {
+        type: String,
+        required: true,
+      },
     },
   ],
+  noOfLikes: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  isEdited: {
+    type: Boolean,
+    default: false,
+  },
+  editDate: {
+    type: Date,
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedDate: {
+    type: Date,
+  },
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
+  bannedDate: {
+    type: Date,
   },
 });
 
