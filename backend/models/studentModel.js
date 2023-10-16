@@ -71,13 +71,7 @@ const studentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  friend: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: "Student",
-      required: false,
-    },
-  ],
+
   isDeleted: { type: Boolean, required: true, default: false },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
