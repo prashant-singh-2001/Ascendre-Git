@@ -135,6 +135,9 @@ exports.banPost = catchAsyncErrors(async (req, res, next) => {
 
 exports.likePost = catchAsyncErrors(async (req, res, next) => {
   const post = await Post.findById(req.params.id);
+  if (!post) {
+    return next(new ErrorHandler("Post not found", 404));
+  }
   const like = {
     a_id: req.student._id,
     name: req.student.name,
@@ -162,6 +165,9 @@ exports.likePost = catchAsyncErrors(async (req, res, next) => {
 
 exports.commentPost = catchAsyncErrors(async (req, res, next) => {
   const post = await Post.findById(req.params.id);
+  if (!post) {
+    return next(new ErrorHandler("Post not found", 404));
+  }
   const comment = {
     Author_ID: req.student._id,
     Author_Name: req.student.name,

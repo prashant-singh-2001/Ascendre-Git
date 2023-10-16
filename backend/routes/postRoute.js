@@ -11,7 +11,6 @@ const {
   banPost,
   likePost,
   commentPost,
-  unlikePost,
 } = require("../controllers/postController");
 const router = express.Router();
 router.use(cors());

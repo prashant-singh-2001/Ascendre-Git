@@ -1,0 +1,44 @@
+New Models:
+
+Friendship Model: This model can be used to manage friend requests, accepted friend connections, and allow students to build a list of friends. It could have fields like sender_id, receiver_id, status (pending, accepted, declined), and date_requested.
+
+Message Model: Implementing a messaging system would enable private conversations between students. The Message Model might include fields like sender_id, receiver_id, message_content, timestamp, and read/unread status.
+
+Group Model: Groups can be created and managed by students on various topics or interests. The Group Model could have fields such as group name, description, members, and posts associated with the group.
+
+Event Model: Students could create and join events or activities. The Event Model may include fields like event name, date, time, location, description, and attendees.
+
+Notification Model: For notifying students about various activities, such as new friend requests, messages, group invitations, or event updates. The model can have fields like sender_id, receiver_id, notification_type, and content.
+
+New Routes for Students:
+
+Friendship Routes:
+
+/friendship/send-request/:id (send a friend request)
+/friendship/accept-request/:id (accept a friend request)
+/friendship/decline-request/:id (decline a friend request)
+/friendship/my-friends (get a list of friends)
+/friendship/requests-received (get pending friend requests)
+Message Routes:
+
+/message/send/:id (send a private message)
+/message/inbox (get a list of messages in the inbox)
+/message/read/:id (mark a message as read)
+Group Routes:
+
+/group/create (create a new group)
+/group/join/:id (join an existing group)
+/group/leave/:id (leave a group)
+/group/:id (get group details)
+/group/:id/posts (get posts in a specific group)
+Event Routes:
+
+/event/create (create a new event)
+/event/join/:id (join an event)
+/event/leave/:id (leave an event)
+/event/:id (get event details)
+/event/:id/attendees (get a list of attendees)
+Notification Routes:
+
+/notifications (get a list of notifications)
+/notifications/mark-read (mark notifications as read)

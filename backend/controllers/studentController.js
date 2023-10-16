@@ -40,7 +40,7 @@ exports.loginStudent = catchAsyncErrors(async (req, res, next) => {
 exports.getStudents = catchAsyncErrors(async (req, res, next) => {
   const allStudents = await Student.find();
   const students = allStudents.filter(
-    (student) => !student.isDeleted && student.role !== "admin"
+    (student) => !student.isDeleted && student.role.toLowerCase() !== "admin"
   );
   res.status(200).json({
     success: true,
@@ -49,7 +49,7 @@ exports.getStudents = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.getStudentsAdmin = catchAsyncErrors(async (req, res, next) => {
-  if (req.student && req.student.role !== "Admin") {
+  if (req.student && student.role.toLowerCase() !== "admin") {
     return next(new ErrorHandler("Unauthorized", 401));
   }
   const allStudents = await Student.find();
