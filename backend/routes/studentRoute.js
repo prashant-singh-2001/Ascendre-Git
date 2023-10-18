@@ -13,28 +13,58 @@ const {
   friendRequest,
   requestAccepted,
   requestRejected,
+  getFriends,
+  getFriendRequest,
 } = require("../controllers/studentController");
 const { isAuthenticatedUser } = require("../middlewares/auth");
 const router = express.Router();
 router.use(cors());
 
+// Student Registration
 router.route("/register").post(createStudent);
+
+// Student Login
 router.route("/login").post(loginStudent);
+
+// Student Logout
 router.route("/logout").post(logoutStudent);
+
+// Get List of Non-Deleted Non-Admin Students
 router.route("/students").get(getStudents);
+
+// Get List of All Students (Admin Access)
 router.route("/Admin/students").get(getStudentsAdmin);
+
+// Get Student Details by ID
 router.route("/getStudent/:id").get(getStudent);
+
+// Change Student Password (Authenticated User)
 router.route("/password/change").put(isAuthenticatedUser, updatePassword);
+
+// Get Details of Currently Authenticated Student
 router.route("/me").get(isAuthenticatedUser, getStudentDetails);
+
+// Delete Currently Authenticated Student's Account
 router.route("/delete/me").delete(isAuthenticatedUser, deleteStudent);
+
+// Send Friend Request to Student by ID
 router
   .route("/friendRequests/send/:id")
   .post(isAuthenticatedUser, friendRequest);
+
+// Accept Friend Request from Student by ID
 router
   .route("/friendRequests/accepted/:id")
   .post(isAuthenticatedUser, requestAccepted);
+
+// Reject Friend Request from Student by ID
 router
   .route("/friendRequests/rejected/:id")
   .post(isAuthenticatedUser, requestRejected);
+// Get Friends
+router.route("/friends").get(isAuthenticatedUser, getFriends);
+
+// Get all friend requests
+router.route("/friendRequests").get(isAuthenticatedUser, getFriendRequest);
 
 module.exports = router;

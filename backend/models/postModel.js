@@ -95,6 +95,17 @@ const postSchema = new mongoose.Schema({
   bannedDate: {
     type: Date,
   },
+  reported: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "Student",
+      required: true,
+    },
+  ],
+  reported_count: {
+    type: Number,
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model("Post", postSchema);

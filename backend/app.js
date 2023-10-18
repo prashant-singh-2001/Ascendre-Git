@@ -17,8 +17,10 @@ app.use(fileUpload());
 
 const student = require("./routes/studentRoute");
 const post = require("./routes/postRoute");
+const club = require("./routes/clubRoute");
 
 app.use("/api/v1/student", student);
 app.use("/api/v1/post", post);
+app.use("/api/v1/club", club);
 
 module.exports = app;

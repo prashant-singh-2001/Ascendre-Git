@@ -161,7 +161,6 @@ exports.getStudentDetails = catchAsyncErrors(async (req, res, next) => {
 // Mark the currently logged-in student's account as deleted.
 exports.deleteStudent = catchAsyncErrors(async (req, res, next) => {
   // Find the student by their ID (the ID of the currently logged-in student).
-
   const student = await Student.findById(req.student.id);
 
   // Mark the student's account as deleted by setting the "isDeleted" flag to true.
@@ -187,6 +186,10 @@ exports.friendRequest = catchAsyncErrors(async (req, res, next) => {
   // Check if both sending and receiving students exist. If not, return an error.
   if (!u1 || !u2) {
     return next(new ErrorHandler("Student not found!", 401));
+  } else if (u1.equals(u2)) {
+    return next(
+      new ErrorHandler("You cannot send a friend request to yourself!", 401)
+    );
   }
 
   // Define sender and receiver IDs, the request date, and set the request status to pending (0).
@@ -238,6 +241,7 @@ exports.friendRequest = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+// Apply a front-end controller to manage the acceptance of the friend request
 // Accept a friend request from another student.
 exports.requestAccepted = catchAsyncErrors(async (req, res, next) => {
   // Extract the sender's ID and the receiver's ID from the request parameters.
@@ -304,5 +308,33 @@ exports.requestRejected = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Friend request rejected",
+  });
+});
+
+exports.getFriends = catchAsyncErrors(async (req, res, next) => {
+  const st_id = req.student._id;
+  const friendship = await Friendship.find({
+    $or: [
+      { reciever_id: st_id, req_status: 1 },
+      { sender_id: st_id, req_status: 1 },
+    ],
+  });
+  res.status(200).json({
+    success: true,
+    friendship,
+  });
+});
+
+exports.getFriendRequest = catchAsyncErrors(async (req, res, next) => {
+  const st_id = req.student._id;
+  const requests = await Friendship.find({
+    $or: [
+      { reciever_id: st_id, req_status: 0 },
+      { sender_id: st_id, req_status: 0 },
+    ],
+  });
+  res.status(200).json({
+    success: true,
+    requests,
   });
 });
