@@ -4,6 +4,7 @@ const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../utils/errorHandler");
 const Club = require("../models/clubModel");
 const Student = require("../models/studentModel");
+const ApiFeatures = require("../utils/apiFeatures");
 
 // Create a new club
 exports.createClub = catchAsyncErrors(async (req, res, next) => {
@@ -33,10 +34,18 @@ exports.createClub = catchAsyncErrors(async (req, res, next) => {
   }
 });
 
-// Get a list of active and non-banned clubs
 exports.getClubs = catchAsyncErrors(async (req, res, next) => {
-  // Find all clubs in the database
-  const clubs = await Club.find();
+  // Create an instance of ApiFeatures, passing the Club model and the query parameters
+  const apiFeatures = new ApiFeatures(Club.find(), req.query);
+
+  // Use the search method to search in specific fields
+  apiFeatures.search("club_name", "description");
+
+  // Optionally, set the page and limit for pagination
+  apiFeatures.pagination(parseInt(req.query.limit) || 10); // Default limit is 10
+
+  // Execute the query using the exec() method
+  const clubs = await apiFeatures.query.exec();
 
   // Filter the clubs to include only active (not banned) clubs
   const activeClubs = clubs.filter((club) => !club.isBanned && club.isActive);
@@ -182,20 +191,13 @@ exports.updateClubDetails = catchAsyncErrors(async (req, res, next) => {
 
 exports.getClubsForStudent = catchAsyncErrors(async (req, res, next) => {
   const clubs = await Club.find({ members: req.student._id });
-  res.status(200).json({
-    success: true,
-    clubs,
-  });
-});
+  // Filter the clubs to include only active (not banned) clubs
+  const activeClubs = clubs.filter((club) => !club.isBanned && club.isActive);
 
-exports.searchClubs = catchAsyncErrors(async (req, res, next) => {
-  const { keyword } = req.query;
-  const clubs = await Club.find({
-    $or: [
-      { club_name: { $regex: keyword, $options: "i" } }, // Case-insensitive search
-      { description: { $regex: keyword, $options: "i" } },
-    ],
-  });
+  if (!activeClubs.length) {
+    // If no clubs are found, return a "Not Found" error response
+    return next(new ErrorHandler(`Cannot find any clubs`, 404));
+  }
   res.status(200).json({
     success: true,
     clubs,
@@ -239,5 +241,20 @@ exports.unbanClub = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Club has been unbanned",
+  });
+});
+
+exports.deactivateClub = catchAsyncErrors(async (req, res, next) => {
+  const club = await Club.findById(req.params.id);
+  if (!club || !club.isActive) {
+    return next(
+      new ErrorHandler(`Cannot find active Club with id ${req.params.id}`, 404)
+    );
+  }
+  club.isActive = false;
+  await club.save();
+  res.status(200).json({
+    success: true,
+    message: "Club has been deactivated",
   });
 });

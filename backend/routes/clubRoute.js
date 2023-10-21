@@ -8,6 +8,11 @@ const {
   joinClub,
   getMembersOfClub,
   removeMember,
+  updateClubDetails,
+  getClubsForStudent,
+  banClub,
+  unbanClub,
+  deactivateClub,
 } = require("../controllers/clubController");
 const router = express.Router();
 router.use(cors());
@@ -15,8 +20,12 @@ router.use(cors());
 router.route("/register").post(isAuthenticatedUser, createClub);
 router.route("/getClubs").get(isAuthenticatedUser, getClubs);
 router.route("/getClub/:id").get(isAuthenticatedUser, getClub);
+router.route("/getStudentsClubs").get(isAuthenticatedUser, getClubsForStudent);
 router.route("/joinClub/:id").post(isAuthenticatedUser, joinClub);
 router.route("/getMembers/:id").get(isAuthenticatedUser, getMembersOfClub);
-router.route("/leaveClub/:id").get(isAuthenticatedUser, removeMember);
-
+router.route("/leaveClub/:id").delete(isAuthenticatedUser, removeMember);
+router.route("/updateClub/:id").put(isAuthenticatedUser, updateClubDetails);
+router.route("/banClub/:id").delete(isAuthenticatedUser, banClub);
+router.route("/unbanClub/:id").patch(isAuthenticatedUser, unbanClub);
+router.route("/deactivate/:id").delete(isAuthenticatedUser, deactivateClub);
 module.exports = router;

@@ -3,6 +3,7 @@ const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../utils/errorHandler");
 const Post = require("../models/postModel");
+const ApiFeatures = require("../utils/apiFeatures");
 const LIMIT = process.env.POST_LIMIT;
 
 // Create a new post authored by the currently authenticated student.
@@ -23,24 +24,29 @@ exports.createPost = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Retrieve posts authored by the currently authenticated student.
 exports.getMyPosts = catchAsyncErrors(async (req, res, next) => {
-  // Calculate the starting position for pagination based on the requested page.
-  const startAt = (Number(req.query.page || 1) - 1) * LIMIT;
+  // Create an instance of ApiFeatures, passing the Post model and the query parameters
+  const apiFeatures = new ApiFeatures(
+    Post.find({ author: req.student._id }),
+    req.query
+  );
 
-  // Retrieve posts authored by the currently authenticated student, sorted by ID in descending order, with pagination.
-  const posts = await Post.find({ author: req.student._id })
-    .sort({ _id: -1 })
-    .limit(LIMIT)
-    .skip(startAt);
+  // Sort posts by ID in descending order
+  apiFeatures.query.sort({ _id: -1 });
 
-  // If no posts are found, return a 404 error.
-  if (!posts) {
-    return next(new ErrorHandler("No posts found", 404));
-  }
+  // Optionally, set the page and limit for pagination
+  apiFeatures.pagination(LIMIT);
+
+  // Execute the query using the exec() method
+  const posts = await apiFeatures.query.exec();
 
   // Filter out any deleted posts from the results.
   const myPosts = posts.filter((post) => !post.isDeleted);
+
+  if (!myPosts.length) {
+    // If no posts are found, return a 404 error.
+    return next(new ErrorHandler("No posts found", 404));
+  }
 
   // Calculate the total number of posts and provide pagination information in the response.
   const total = posts.length;
@@ -56,25 +62,31 @@ exports.getMyPosts = catchAsyncErrors(async (req, res, next) => {
 
 // Retrieve all posts authored by students other than the currently authenticated student.
 exports.getAllPosts = catchAsyncErrors(async (req, res, next) => {
-  // Calculate the starting position for pagination based on the requested page.
-  const startAt = (Number(req.query.page || 1) - 1) * LIMIT;
+  // Create an instance of ApiFeatures, passing the Post model and the query parameters
+  const apiFeatures = new ApiFeatures(
+    Post.find({ author: { $ne: req.student._id } }), // Exclude posts by the currently authenticated student
+    req.query
+  );
 
-  // Retrieve all posts authored by students other than the currently authenticated student, sorted by ID in descending order, with pagination.
-  const allPosts = await Post.find({ author: { $ne: req.student._id } })
-    .sort({ _id: -1 })
-    .limit(LIMIT)
-    .skip(startAt);
+  // Sort posts by ID in descending order
+  apiFeatures.query.sort({ _id: -1 });
 
-  // If no posts are found, return a 404 error.
-  if (!allPosts) {
-    return next(new ErrorHandler("No posts found", 404));
-  }
+  // Optionally, set the page and limit for pagination
+  apiFeatures.pagination(LIMIT);
+
+  // Execute the query using the exec() method
+  const allPosts = await apiFeatures.query.exec();
 
   // Filter out any deleted or banned posts from the results.
   const posts = allPosts.filter((post) => !post.isDeleted && !post.isBanned);
 
+  if (!posts.length) {
+    // If no posts are found, return a 404 error.
+    return next(new ErrorHandler("No posts found", 404));
+  }
+
   // Calculate the total number of posts and provide pagination information in the response.
-  const total = posts.length;
+  const total = allPosts.length;
 
   // Respond with a success status (200), the retrieved posts, and pagination details.
   res.status(200).json({
@@ -85,24 +97,29 @@ exports.getAllPosts = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// Retrieve all posts with admin access.
 exports.getAllPostsAdmin = catchAsyncErrors(async (req, res, next) => {
   // Check if the requestor is an admin student; if not, return an unauthorized (401) error.
   if (req.student && req.student.role !== "admin") {
     return next(new ErrorHandler("Unauthorized", 401));
   }
 
-  // Calculate the starting position for pagination based on the requested page.
-  const startAt = (Number(req.query.page || 1) - 1) * LIMIT;
+  // Create an instance of ApiFeatures, passing the Post model and the query parameters
+  const apiFeatures = new ApiFeatures(Post.find(), req.query);
 
-  // Count the total number of posts in the database.
-  const total = await Post.find().countDocuments({});
+  // Sort posts by ID in descending order
+  apiFeatures.query.sort({ _id: -1 });
 
-  // Retrieve posts sorted by ID in descending order, with pagination.
-  const posts = await Post.find().sort({ _id: -1 }).limit(LIMIT).skip(startAt);
+  // Calculate the total number of posts in the database
+  const total = await apiFeatures.query.model.countDocuments({});
 
-  // If no posts are found, return a 404 error.
-  if (!posts) {
+  // Optionally, set the page and limit for pagination
+  apiFeatures.pagination(LIMIT);
+
+  // Execute the query using the exec() method
+  const posts = await apiFeatures.query.exec();
+
+  if (!posts.length) {
+    // If no posts are found, return a 404 error.
     return next(new ErrorHandler("No posts found", 404));
   }
 
@@ -114,6 +131,7 @@ exports.getAllPostsAdmin = catchAsyncErrors(async (req, res, next) => {
     totalPages: Math.ceil(total / LIMIT),
   });
 });
+
 
 // Update a post with the provided data, if the requestor is the author.
 exports.updatePost = catchAsyncErrors(async (req, res, next) => {

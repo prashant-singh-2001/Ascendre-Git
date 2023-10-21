@@ -15,6 +15,9 @@ const {
   requestRejected,
   getFriends,
   getFriendRequest,
+  forgotPassword,
+  resetPassword,
+  updateStudent,
 } = require("../controllers/studentController");
 const { isAuthenticatedUser } = require("../middlewares/auth");
 const router = express.Router();
@@ -23,11 +26,18 @@ router.use(cors());
 // Student Registration
 router.route("/register").post(createStudent);
 
+// Update Student
+router.route("/update").put(isAuthenticatedUser, updateStudent);
+
 // Student Login
 router.route("/login").post(loginStudent);
 
 // Student Logout
 router.route("/logout").post(logoutStudent);
+
+router.route("/password/forgot").post(forgotPassword);
+
+router.route("/password/reset/:token").put(resetPassword);
 
 // Get List of Non-Deleted Non-Admin Students
 router.route("/students").get(getStudents);

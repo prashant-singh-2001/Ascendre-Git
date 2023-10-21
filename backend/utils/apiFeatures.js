@@ -5,16 +5,17 @@ class ApiFeatures {
     this.query = query;
     this.queryStr = queryStr;
   }
-  search() {
-    const keyword = this.queryStr.keyword
-      ? {
-          manufacturer: {
-            $regex: this.queryStr.keyword,
-            $options: "i",
-          },
-        }
-      : {};
-    this.query = this.query.find({ ...keyword });
+  search(...searchFields) {
+    const keyword = this.queryStr.keyword;
+    if (keyword && searchFields.length > 0) {
+      const orConditions = searchFields.map((field) => ({
+        [field]: {
+          $regex: keyword,
+          $options: "i",
+        },
+      }));
+      this.query.or(orConditions);
+    }
     return this;
   }
   filter() {

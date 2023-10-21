@@ -1,10 +1,12 @@
 const express = require("express");
+const crypto = require("crypto");
 const Student = require("../models/studentModel");
 const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors");
 const ErrorHandler = require("../utils/errorHandler");
 const Post = require("../models/postModel");
 const Friendship = require("../models/friendshipModel");
+const sendEmail = require("../utils/sendEmail");
 
 // Handle the creation of a new student account.
 exports.createStudent = catchAsyncErrors(async (req, res, next) => {
@@ -46,6 +48,73 @@ exports.loginStudent = catchAsyncErrors(async (req, res, next) => {
   }
 
   // Generate and send a JSON Web Token (JWT) for the authenticated student, and set HTTP status code to 200 (OK).
+  sendToken(student, 200, res);
+});
+
+exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  const student = await Student.findOne({ email: req.body.email });
+
+  if (!student) {
+    return next(new ErrorHandler("Student not found", 404));
+  }
+
+  // Get ResetPassword Token
+  const resetToken = student.getResetPasswordToken();
+
+  await student.save({ validateBeforeSave: false });
+
+  const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+
+  const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email then, please ignore it.`;
+
+  try {
+    await sendEmail({
+      email: student.email,
+      subject: `Ecommerce Password Recovery`,
+      message,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${student.email} successfully`,
+    });
+  } catch (error) {
+    student.resetPasswordToken = undefined;
+
+    await student.save({ validateBeforeSave: false });
+
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
+
+// Reset Password
+exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
+  // creating token hash
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  console.log(resetPasswordToken);
+  const student = await Student.findOne({
+    resetPasswordToken: resetPasswordToken,
+  });
+  if (!student) {
+    return next(
+      new ErrorHandler(
+        "Reset Password Token is invalid or has been expired",
+        400
+      )
+    );
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password does not password", 400));
+  }
+
+  student.password = req.body.password;
+  student.resetPasswordToken = undefined;
+  await student.save();
+
   sendToken(student, 200, res);
 });
 
@@ -97,6 +166,44 @@ exports.getStudent = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     success: true,
     student,
+  });
+});
+
+exports.updateStudent = catchAsyncErrors(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    course: req.body.course,
+    privacy: req.body.privacy,
+    contact_number: req.body.contact,
+  };
+  // if (req.body.avatar !== "") {
+  //   const user = await User.findById(req.user.id);
+
+  //   const imageId = user.avatar.public_id;
+
+  //   await cloudinary.v2.uploader.destroy(imageId);
+
+  //   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+  //     folder: "avatars",
+  //     width: 150,
+  //     crop: "scale",
+  //   });
+
+  //   newUserData.avatar = {
+  //     public_id: myCloud.public_id,
+  //     url: myCloud.secure_url,
+  //   };
+  // }
+
+  await Student.findByIdAndUpdate(req.student.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
   });
 });
 
@@ -280,7 +387,7 @@ exports.requestAccepted = catchAsyncErrors(async (req, res, next) => {
 // Reject a friend request from another student.
 exports.requestRejected = catchAsyncErrors(async (req, res, next) => {
   // Extract the sender's ID and the receiver's ID from the request parameters.
-  const senderId = req.params.id; // The ID of the user whose request is being rejected
+  const senderId = req.params.id; // The ID of the student whose request is being rejected
   const receiverId = req.student._id; // The ID of the currently logged-in student
 
   // Find the Friendship document where the sender and receiver match and the request status is pending (0)
