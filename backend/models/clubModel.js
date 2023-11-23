@@ -15,6 +15,26 @@ const club = new mongoose.Schema({
     ref: "student",
     required: true,
   },
+  club_badge: {
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+  banner: {
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+  },
   members: [
     {
       type: mongoose.Schema.ObjectId,

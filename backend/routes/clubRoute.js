@@ -18,9 +18,9 @@ const router = express.Router();
 router.use(cors());
 
 router.route("/register").post(isAuthenticatedUser, createClub);
-router.route("/getClubs").get(isAuthenticatedUser, getClubs);
+router.route("/getClubs").get(getClubs);
 router.route("/getClub/:id").get(isAuthenticatedUser, getClub);
-router.route("/getStudentsClubs").get(isAuthenticatedUser, getClubsForStudent);
+router.route("/getStudentsClubs").post(getClubsForStudent);
 router.route("/joinClub/:id").post(isAuthenticatedUser, joinClub);
 router.route("/getMembers/:id").get(isAuthenticatedUser, getMembersOfClub);
 router.route("/leaveClub/:id").delete(isAuthenticatedUser, removeMember);

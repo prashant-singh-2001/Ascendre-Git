@@ -24,10 +24,10 @@ const router = express.Router();
 router.use(cors());
 
 // Student Registration
-router.route("/register").post(createStudent);
+router.route("/").post(createStudent);
 
 // Update Student
-router.route("/update").put(isAuthenticatedUser, updateStudent);
+router.route("/").put(isAuthenticatedUser, updateStudent);
 
 // Student Login
 router.route("/login").post(loginStudent);
@@ -35,7 +35,7 @@ router.route("/login").post(loginStudent);
 // Student Logout
 router.route("/logout").post(logoutStudent);
 
-router.route("/password/forgot").post(forgotPassword);
+router.route("/password/").post(forgotPassword);
 
 router.route("/password/reset/:token").put(resetPassword);
 
@@ -49,10 +49,10 @@ router.route("/Admin/students").get(getStudentsAdmin);
 router.route("/getStudent/:id").get(getStudent);
 
 // Change Student Password (Authenticated User)
-router.route("/password/change").put(isAuthenticatedUser, updatePassword);
+router.route("/password/").put(isAuthenticatedUser, updatePassword);
 
 // Get Details of Currently Authenticated Student
-router.route("/me").get(isAuthenticatedUser, getStudentDetails);
+router.route("/").get(isAuthenticatedUser, getStudentDetails);
 
 // Delete Currently Authenticated Student's Account
 router.route("/delete/me").delete(isAuthenticatedUser, deleteStudent);

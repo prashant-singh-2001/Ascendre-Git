@@ -132,7 +132,6 @@ exports.getAllPostsAdmin = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
 // Update a post with the provided data, if the requestor is the author.
 exports.updatePost = catchAsyncErrors(async (req, res, next) => {
   // Find the post to be updated by its ID.
@@ -320,4 +319,27 @@ exports.reportPost = catchAsyncErrors(async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+// Get post from one club
+exports.getClubPosts = catchAsyncErrors(async (req, res, next) => {
+  const posts = await Post.find({ club: req.params.id });
+  if (posts.length <= 0) {
+    return next(new ErrorHandler("Couldn't find", 404));
+  }
+  res.status(200).json({
+    success: true,
+    posts,
+  });
+});
+
+exports.getPost = catchAsyncErrors(async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return next(new ErrorHandler("No post found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    post,
+  });
 });

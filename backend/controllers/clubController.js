@@ -9,14 +9,20 @@ const ApiFeatures = require("../utils/apiFeatures");
 // Create a new club
 exports.createClub = catchAsyncErrors(async (req, res, next) => {
   // Extract club_name and description from the request body
-  const { club_name, description } = req.body;
+  const { club_name, description, club_badge, banner } = req.body;
 
   // Get the ID of the admin (currently logged-in student)
   const admin = req.student._id;
 
   try {
     // Create a new club with the provided information
-    const club = await Club.create({ club_name, description, admin });
+    const club = await Club.create({
+      club_name,
+      description,
+      admin,
+      club_badge,
+      banner,
+    });
 
     if (!club) {
       // If the club creation fails, return an error response
@@ -190,7 +196,7 @@ exports.updateClubDetails = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.getClubsForStudent = catchAsyncErrors(async (req, res, next) => {
-  const clubs = await Club.find({ members: req.student._id });
+  const clubs = await Club.find({ members: req.body.id });
   // Filter the clubs to include only active (not banned) clubs
   const activeClubs = clubs.filter((club) => !club.isBanned && club.isActive);
 
