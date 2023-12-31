@@ -287,8 +287,8 @@ exports.deleteStudent = catchAsyncErrors(async (req, res, next) => {
 // Initiate a friend request between two students.
 exports.friendRequest = catchAsyncErrors(async (req, res, next) => {
   // Find the sending and receiving students by their respective IDs.
-  const u1 = await Student.findById(req.student._id);
-  const u2 = await Student.findById(req.params.id);
+  const u1 = await Student.findById(req.params._id);
+  const u2 = await Student.findById(req.params.r_id);
 
   // Check if both sending and receiving students exist. If not, return an error.
   if (!u1 || !u2) {

@@ -3,6 +3,7 @@ import Layout from "../components/Layout";
 import { Metadata } from "next";
 import { User } from "./user";
 import { Club } from "./clubs";
+import Posts from "./posts";
 export const metadata: Metadata = {
   title: "Ascendre",
   description: "Student Social Site",
@@ -13,7 +14,7 @@ const page = async () => {
       <Layout>
         <div className="flex flex-row w-full h-full  gap-1 ">
           <div className="flex flex-wrap w-full xl:w-8/12 h-full  rounded overflow-y-scroll no-scrollbar">
-            {/* <User /> */}
+            <Posts />
           </div>
           <div className="hidden xl:flex flex-wrap flex-row w-4/12 h-full  rounded border-l-8 border-l-gray-500 py-4 px-2 overflow-y-scroll no-scrollbar">
             <User />

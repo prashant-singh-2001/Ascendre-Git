@@ -25,7 +25,7 @@ router.route("/").post(isAuthenticatedUser, createPost);
 router.route("/me/:id").get(isAuthenticatedUser, getMyPosts);
 
 // Get all posts except those created by the logged-in student. Requires authentication.
-router.route("/").get(isAuthenticatedUser, getAllPosts);
+router.route("/").get(getAllPosts);
 
 router.route("/:id").get(isAuthenticatedUser, getPost);
 

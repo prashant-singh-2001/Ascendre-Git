@@ -64,7 +64,7 @@ exports.getMyPosts = catchAsyncErrors(async (req, res, next) => {
 exports.getAllPosts = catchAsyncErrors(async (req, res, next) => {
   // Create an instance of ApiFeatures, passing the Post model and the query parameters
   const apiFeatures = new ApiFeatures(
-    Post.find({ author: { $ne: req.student._id } }), // Exclude posts by the currently authenticated student
+    Post.find({ author: { $ne: req.body._id } }), // Exclude posts by the currently authenticated student
     req.query
   );
 
